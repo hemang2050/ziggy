@@ -81,12 +81,12 @@ export const SearchBar = () => {
   };
 
   return (
-    <div className="w-full bg-white rounded-lg shadow-lg overflow-hidden">
+    <div className="w-full bg-white rounded-lg shadow-lg overflow-hidden ">
       {/* Tab Selector */}
-      <div className="flex border-b">
+      <div className="flex border-b ">
         <button
           onClick={() => setSearchType('hotels')}
-          className={`flex items-center px-6 py-4 text-sm font-medium ${
+          className={`flex items-center px-6 py-4 text-sm font-medium hover:cursor-pointer ${
             searchType === 'hotels'
               ? 'text-blue-600 border-b-2 border-blue-600'
               : 'text-gray-500 hover:text-gray-700'
@@ -97,7 +97,7 @@ export const SearchBar = () => {
         </button>
         <button
           onClick={() => setSearchType('flights')}
-          className={`flex items-center px-6 py-4 text-sm font-medium ${
+          className={`flex items-center px-6 py-4 text-sm font-medium hover:cursor-pointer ${
             searchType === 'flights'
               ? 'text-blue-600 border-b-2 border-blue-600'
               : 'text-gray-500 hover:text-gray-700'
@@ -188,7 +188,7 @@ export const SearchBar = () => {
             <button
               type="submit"
               disabled={isSearching}
-              className={`w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-medium flex items-center justify-center ${
+              className={`w-full mt-6 bg-blue-600 hover:bg-blue-700 cursor-pointer text-white py-3 px-6 rounded-lg font-medium flex items-center justify-center ${
                 isSearching ? 'opacity-70 cursor-not-allowed' : ''
               }`}
             >

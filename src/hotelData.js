@@ -99,7 +99,7 @@ export const featuredDestinations = [
       price: 'From $120/night'
     },
     {
-      name: 'New York City, USA',
+      name: 'New York, USA',
       image: 'https://images.pexels.com/photos/1239162/pexels-photo-1239162.jpeg?cs=srgb&dl=pexels-mikel-1239162.jpg&fm=jpg',
       description: 'The city that never sleeps, packed with iconic skyscrapers and cultural diversity.',
       rating: 4.6,
@@ -154,3 +154,38 @@ export const featuredDestinations = [
       readMoreLink: '#adventure-travel'
     }
   ];
+
+
+
+
+
+  export const additionalImages = [
+      // Fallback images if no hotel images are available
+      'https://images.unsplash.com/photo-1566195992011-5f6b7324ad04',
+      'https://images.unsplash.com/photo-1582719478250-c10d0bddb8f3',
+      'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa'
+    ];
+  
+    export const mockReviews = [
+      {
+        name: 'Jack H.',
+        rating: 5,
+        date: 'March 2024',
+        text: 'Absolutely amazing hotel! The service was impeccable and the room was spacious and clean.',
+        pros: ['Great location', 'Friendly staff', 'Comfortable beds']
+      },
+      {
+        name: 'Sarah M.',
+        rating: 4,
+        date: 'February 2024',
+        text: 'Really enjoyed my stay. The amenities were top-notch and the view was breathtaking.',
+        pros: ['Beautiful view', 'Excellent breakfast', 'Modern facilities']
+      },
+      {
+        name: 'Mike R.',
+        rating: 5,
+        date: 'January 2024',
+        text: 'Perfect for both business and leisure. The business center and gym were exactly what I needed.',
+        pros: ['Convenient workspace', 'Well-equipped gym', 'Excellent Wi-Fi']
+      }
+    ];

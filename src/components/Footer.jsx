@@ -86,7 +86,7 @@ export const Footer = () => {
         </div>
         <div className="mt-8 border-t border-gray-700 pt-8">
           <p className="text-base text-gray-400 text-center">
-            &copy; {new Date().getFullYear()} TourPlanner. All rights reserved.
+            &copy; {new Date().getFullYear()} Ziggy. All rights reserved.
           </p>
         </div>
       </div>

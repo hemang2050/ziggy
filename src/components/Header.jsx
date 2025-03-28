@@ -50,11 +50,11 @@ export const Header = () => {
           </div>
 
           {/* User Section - Moving slightly to the right */}
-          <div className="hidden sm:flex items-center space-x-3 md:space-x-4 ml-8 md:ml-16">
+          <div className="hidden sm:flex items-center space-x-3 md:space-x-4 ml-8 md:ml-16 ">
             <div className="relative">
               <button
                 onClick={toggleUserMenu}
-                className="rounded-full p-1 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-blue-600"
+                className="rounded-full p-1 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 focus:ring-offset-blue-600 hover:cursor-pointer"
               >
                 <div className="h-8 w-8 md:h-10 md:w-10 rounded-full bg-blue-100 flex items-center justify-center">
                   <svg className="h-5 w-5 md:h-6 md:w-6 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -156,10 +156,10 @@ export const Header = () => {
             Itinerary
           </Link>
         </div>
-        <div className="pt-4 pb-3 border-t border-gray-200">
+        <div className="pt-4 pb-3 border-t border-gray-200 ">
           <div className="flex items-center px-6">
             <div className="flex-shrink-0">
-              <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center ">
                 <svg className="h-6 w-6 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>

@@ -5,6 +5,7 @@ import {SearchResults} from './pages/SearchResults';
 import {ItineraryPage} from './pages/ItineraryPage';
 import {BookingPage} from './pages/BookingPage';
 import {Profile} from './pages/Profile';
+import {HotelDetail} from './pages/HotelDetail';
 import './App.css';
 
 const App = () => {
@@ -14,6 +15,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/search" element={<SearchResults />} />
+        <Route path="/hotel/:id" element={<HotelDetail />} />
         <Route path="/itinerary" element={<ItineraryPage />} />
         <Route path="/bookings" element={<BookingPage />} />
         <Route path="/profile" element={<Profile />} />
