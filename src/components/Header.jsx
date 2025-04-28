@@ -11,21 +11,19 @@ export const Header = () => {
     const checkUserAuth = () => {
       const userId = sessionStorage.getItem('currentUserId');
       const userEmail = sessionStorage.getItem('currentUserEmail');
-      
+      const userName = sessionStorage.getItem('currentUserName');
+
       if (userId && userEmail) {
-        const users = JSON.parse(localStorage.getItem('users') || '[]');
-        const user = users.find(u => u.id === userId);
-        
         setCurrentUser({
           id: userId,
           email: userEmail,
-          name: user?.name || userEmail.split('@')[0]
+          name: userName || userEmail.split('@')[0]
         });
       } else {
         setCurrentUser(null);
       }
     };
-    
+
     checkUserAuth();
     window.addEventListener('storage', checkUserAuth);
     return () => window.removeEventListener('storage', checkUserAuth);
@@ -43,6 +41,8 @@ export const Header = () => {
     e.preventDefault();
     sessionStorage.removeItem('currentUserId');
     sessionStorage.removeItem('currentUserEmail');
+    sessionStorage.removeItem('currentUserToken');
+    sessionStorage.removeItem('currentUserName');
     setCurrentUser(null);
     navigate('/');
     setIsMenuOpen(false);
