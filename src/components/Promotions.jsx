@@ -26,7 +26,7 @@ export function Promotions() {
 
   return (
     <div className="container mx-auto px-4 py-12 text-white">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 cursor-pointer">
         {promotions.map((promo, index) => (
           <div 
             key={index} 

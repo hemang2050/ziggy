@@ -1,67 +1,52 @@
 import React, { useState, useEffect } from 'react';
-import { useLocation, useParams, useNavigate } from 'react-router-dom';
-import { 
-  Star, 
-  MapPin, 
-  Wifi, 
-  Utensils, 
-  Dumbbell, 
-  Bath, 
-  ChevronLeft, 
-  ChevronRight, 
-  ChevronDown, 
-  ChevronUp,
-  ArrowLeft
-} from 'lucide-react';
-import { mockReviews, additionalImages } from '../hotelData';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { ChevronLeft, ChevronRight, Star, ArrowLeft } from 'lucide-react';
+import { mockHotels, additionalImages } from '../hotelData';
+import { Header } from '../components/Header';
+import { Footer } from '../components/Footer';
 
 export const HotelDetail = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
   const { id } = useParams();
-  const [hotel, setHotel] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [expandedSections, setExpandedSections] = useState({
-    description: false,
-    amenities: false,
-    rooms: false,
-    reviews: false
-  });
-
-  // Mock additional images and reviews
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   
+  // Get the search parameters
+  const checkIn = searchParams.get('checkIn') || '';
+  const checkOut = searchParams.get('checkOut') || '';
+  const guests = searchParams.get('guests') || '1';
+  const location = searchParams.get('location') || '';
+  const rooms = parseInt(searchParams.get('rooms')) || 1; // Get rooms from search params
+  
+  const [hotel, setHotel] = useState(null);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check if hotel data was passed through navigation state
-    if (location.state && location.state.hotelData) {
-      setHotel(location.state.hotelData);
-      setLoading(false);
-    } else {
-      // If no data passed, you might want to fetch hotel details by ID
-      console.log('Fetching hotel details for ID:', id);
-      // Placeholder for actual API call
-      setLoading(false);
+    // Find the hotel in mockHotels using the ID
+    const foundHotel = mockHotels.find(h => h.hotel.hotelId === id);
+    
+    if (foundHotel) {
+      setHotel(foundHotel);
     }
-  }, [location.state, id]);
-
-  const toggleSection = (section) => {
-    setExpandedSections(prev => ({
-      ...prev,
-      [section]: !prev[section]
-    }));
-  };
+    
+    setLoading(false);
+  }, [id]);
 
   const nextImage = () => {
-    setCurrentImageIndex((prev) => 
-      prev === additionalImages.length - 1 ? 0 : prev + 1
-    );
+    if (additionalImages.length > 0) {
+      setCurrentImageIndex((prev) => (prev + 1) % additionalImages.length);
+    }
+  };
+  
+  const prevImage = () => {
+    if (additionalImages.length > 0) {
+      setCurrentImageIndex((prev) => (prev - 1 + additionalImages.length) % additionalImages.length);
+    }
   };
 
-  const prevImage = () => {
-    setCurrentImageIndex((prev) => 
-      prev === 0 ? additionalImages.length - 1 : prev - 1
-    );
+  const handleBookNow = () => {
+    // Navigate to checkout with all necessary data in URL parameters
+    navigate(`/checkout?hotelId=${id}&checkIn=${checkIn}&checkOut=${checkOut}&guests=${guests}&rooms=${rooms}&location=${encodeURIComponent(location)}`);
   };
 
   if (loading) {
@@ -69,188 +54,219 @@ export const HotelDetail = () => {
   }
 
   if (!hotel) {
-    return <div className="text-center py-12">Hotel not found</div>;
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <h2 className="text-2xl font-bold mb-4">Hotel Not Found</h2>
+        <button 
+          onClick={() => navigate(-1)}
+          className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+        >
+          <ArrowLeft size={20} className="mr-2" />
+          Go Back to Search
+        </button>
+      </div>
+    );
   }
 
-  // Combine hotel images with fallback images
-  const images = hotel.hotel.media && hotel.hotel.media.length > 0 
-    ? hotel.hotel.media.map(media => media.uri)
-    : additionalImages;
+  const hotelData = hotel.hotel || {};
+  const offer = hotel.offers?.[0] || {};
+  const pricePerNight = offer.price?.total ? parseFloat(offer.price.total) : 0;
+  
+  // Calculate number of nights
+  const calculateNights = () => {
+    if (!checkIn || !checkOut) return 1;
+    
+    const checkInDate = new Date(checkIn);
+    const checkOutDate = new Date(checkOut);
+    const timeDiff = checkOutDate.getTime() - checkInDate.getTime();
+    return Math.ceil(timeDiff / (1000 * 3600 * 24));
+  };
+  
+  const nights = calculateNights();
+  
+  // Calculate the total price for all rooms and nights
+  const totalRoomPrice = pricePerNight * nights * rooms;
+  const cleaningFee = 50.00 * rooms; // Applying cleaning fee per room
+  const serviceFee = 35.00 * rooms; // Applying service fee per room
+  const totalPrice = totalRoomPrice + cleaningFee + serviceFee;
 
   return (
-    <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
-      {/* Back Button */}
-      <button 
-        onClick={() => navigate(-1)}
-        className="absolute top-4 left-4 z-10 bg-white/75 rounded-full p-2 hover:bg-white"
-      >
-        <ArrowLeft />
-      </button>
-
-      {/* Image Gallery */}
-      <div className="relative h-96 overflow-hidden">
-        <img 
-          src={images[currentImageIndex]} 
-          alt={`${hotel.hotel.name} - Image ${currentImageIndex + 1}`} 
-          className="w-full h-full object-cover"
-        />
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Back button */}
         <button 
-          onClick={prevImage} 
-          className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/75 rounded-full p-2 hover:bg-white"
+          onClick={() => navigate(-1)}
+          className="flex items-center mb-6 text-blue-600 hover:text-blue-800"
         >
-          <ChevronLeft />
+          <ArrowLeft size={20} className="mr-2" />
+          Back to Search Results
         </button>
-        <button 
-          onClick={nextImage} 
-          className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/75 rounded-full p-2 hover:bg-white"
-        >
-          <ChevronRight />
-        </button>
-        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
-          {images.map((_, index) => (
-            <button 
-              key={index} 
-              onClick={() => setCurrentImageIndex(index)}
-              className={`w-2 h-2 rounded-full ${
-                index === currentImageIndex ? 'bg-blue-600' : 'bg-gray-300'
-              }`}
-            />
-          ))}
-        </div>
-      </div>
 
-      {/* Hotel Header */}
-      <div className="p-6 border-b">
-        <div className="flex justify-between items-start">
-          <div>
-            <h1 className="text-2xl font-bold">{hotel.hotel.name}</h1>
-            <div className="flex items-center mt-2 text-yellow-500">
-              {[...Array(5)].map((_, i) => (
+        {/* Hotel name and rating */}
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold">{hotelData.name}</h1>
+          <div className="flex items-center mt-2">
+            <div className="flex text-yellow-400">
+              {[...Array(5)].map((_, index) => (
                 <Star 
-                  key={i} 
-                  size={20} 
-                  fill={i < Math.round(hotel.hotel.rating) ? 'currentColor' : 'none'}
+                  key={index} 
+                  size={18} 
+                  fill={index < hotelData.rating ? "currentColor" : "none"}
+                  stroke={index < hotelData.rating ? "currentColor" : "currentColor"} 
                 />
               ))}
-              <span className="text-gray-600 ml-2">
-                {hotel.hotel.rating.toFixed(1)} ({mockReviews.length} reviews)
-              </span>
             </div>
-            <div className="flex items-center text-gray-600 mt-2">
-              <MapPin size={18} className="mr-2" />
-              {hotel.hotel.address.cityName}
-            </div>
-          </div>
-          <div className="text-2xl font-bold text-green-600">
-            ${hotel.offers[0].price.total}/night
+            <span className="ml-2 text-gray-600">{hotelData.rating} stars</span>
+            <span className="mx-2 text-gray-400">•</span>
+            <span className="text-gray-600">{hotelData.address?.cityName || location}</span>
           </div>
         </div>
-      </div>
 
-      {/* Expandable Sections */}
-      <div className="p-6 space-y-6">
-        {/* Description Section */}
-        <div className="border-b pb-6">
-          <button 
-            onClick={() => toggleSection('description')} 
-            className="w-full flex justify-between items-center"
-          >
-            <h2 className="text-xl font-semibold">Description</h2>
-            {expandedSections.description ? <ChevronUp /> : <ChevronDown />}
-          </button>
-          {expandedSections.description && (
-            <p className="mt-4 text-gray-600">
-              {hotel.hotel.name} offers a luxurious stay in the heart of {hotel.hotel.address.cityName}. 
-              Combining modern comfort with exceptional service, our hotel provides an unforgettable 
-              experience for both leisure and business travelers. With state-of-the-art amenities and 
-              a prime location, we ensure your stay is both comfortable and memorable.
-            </p>
-          )}
+        {/* Image gallery */}
+        <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+          <div className="relative h-96">
+            <img 
+              src={hotelData.media?.[0]?.uri || additionalImages[currentImageIndex] || 'https://images.unsplash.com/photo-1566073771259-6a8506099945'} 
+              alt={hotelData.name} 
+              className="w-full h-full object-cover"
+            />
+            
+            <button 
+              onClick={prevImage}
+              className="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-md hover:bg-gray-100"
+              aria-label="Previous image"
+            >
+              <ChevronLeft size={24} />
+            </button>
+            
+            <button 
+              onClick={nextImage}
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white p-2 rounded-full shadow-md hover:bg-gray-100"
+              aria-label="Next image"
+            >
+              <ChevronRight size={24} />
+            </button>
+          </div>
+          
+          {/* Thumbnail images - optional enhancement */}
+          {/* <div className="flex p-2 overflow-x-auto">
+            {additionalImages.slice(0, 5).map((img, idx) => (
+              <div 
+                key={idx}
+                onClick={() => setCurrentImageIndex(idx)}
+                className={`w-24 h-16 flex-shrink-0 mx-1 cursor-pointer rounded-md overflow-hidden ${
+                  currentImageIndex === idx ? 'ring-2 ring-blue-500' : ''
+                }`}
+              >
+                <img src={img} alt={`${hotelData.name} view ${idx + 1}`} className="w-full h-full object-cover" />
+              </div>
+            ))}
+          </div> */}
         </div>
 
-        {/* Amenities Section */}
-        <div className="border-b pb-6">
-          <button 
-            onClick={() => toggleSection('amenities')} 
-            className="w-full flex justify-between items-center"
-          >
-            <h2 className="text-xl font-semibold">Amenities</h2>
-            {expandedSections.amenities ? <ChevronUp /> : <ChevronDown />}
-          </button>
-          {expandedSections.amenities && (
-            <div className="mt-4 grid grid-cols-2 gap-4">
-              {hotel.hotel.amenities.map((amenity) => {
-                const amenityIcons = {
-                  'WiFi': <Wifi className="text-blue-500" />,
-                  'Restaurant': <Utensils className="text-green-500" />,
-                  'Gym': <Dumbbell className="text-red-500" />,
-                  'Spa': <Bath className="text-purple-500" />
-                };
-                return (
-                  <div key={amenity} className="flex items-center space-x-2">
-                    {amenityIcons[amenity] || <span className="w-5 h-5 bg-gray-200 rounded-full" />}
-                    <span>{amenity}</span>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Reviews Section */}
-        <div>
-          <button 
-            onClick={() => toggleSection('reviews')} 
-            className="w-full flex justify-between items-center"
-          >
-            <h2 className="text-xl font-semibold">Guest Reviews</h2>
-            {expandedSections.reviews ? <ChevronUp /> : <ChevronDown />}
-          </button>
-          {expandedSections.reviews && (
-            <div className="mt-4 space-y-4">
-              {mockReviews.map((review, index) => (
-                <div key={index} className="border-b pb-4 last:border-b-0">
-                  <div className="flex justify-between items-center mb-2">
-                    <div className="flex items-center">
-                      <h3 className="font-medium mr-2">{review.name}</h3>
-                      <div className="flex text-yellow-500">
-                        {[...Array(5)].map((_, i) => (
-                          <Star 
-                            key={i} 
-                            size={16} 
-                            fill={i < review.rating ? 'currentColor' : 'none'}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    <span className="text-sm text-gray-500">{review.date}</span>
-                  </div>
-                  <p className="text-gray-600 mb-2">{review.text}</p>
-                  {review.pros && (
-                    <div className="flex flex-wrap gap-2">
-                      {review.pros.map((pro) => (
-                        <span 
-                          key={pro} 
-                          className="bg-green-50 text-green-700 text-xs px-2 py-1 rounded"
-                        >
-                          {pro}
-                        </span>
-                      ))}
-                    </div>
-                  )}
+        {/* Main content */}
+        <div className="flex flex-col lg:flex-row gap-8">
+          {/* Hotel details */}
+          <div className="flex-1">
+            <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+              <h2 className="text-xl font-bold mb-4">About this hotel</h2>
+              <p className="text-gray-700 mb-4">
+                {hotelData.description || 
+                  `Experience luxury and comfort at ${hotelData.name}, perfectly located in the heart of ${hotelData.address?.cityName || location}. 
+                  Our hotel offers modern amenities, spacious rooms, and exceptional service to make your stay memorable.`}
+              </p>
+              
+              {/* Amenities */}
+              {hotelData.amenities && hotelData.amenities.length > 0 && (
+                <div className="mt-6">
+                  <h3 className="text-lg font-semibold mb-3">Amenities</h3>
+                  <ul className="grid grid-cols-2 gap-2">
+                    {hotelData.amenities.slice(0, 8).map((amenity, index) => (
+                      <li key={index} className="flex items-center text-gray-700">
+                        <span className="mr-2">•</span> {amenity}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-              ))}
+              )}
             </div>
-          )}
+
+            {/* Location */}
+           
+          </div>
+          
+          {/* Booking panel */}
+          <div className="lg:w-96">
+            <div className="bg-white rounded-lg shadow-md p-6 sticky top-4">
+              <div className="flex justify-between items-center mb-4">
+                <div>
+                  <span className="text-2xl font-bold text-green-600">${pricePerNight.toFixed(2)}</span>
+                  <span className="text-gray-500"> / night{rooms > 1 ? ' / room' : ''}</span>
+                </div>
+                <div className="flex items-center text-yellow-400">
+                  <Star size={16} fill="currentColor" />
+                  <span className="ml-1 text-gray-700">{hotelData.rating}</span>
+                </div>
+              </div>
+              
+              <div className="border rounded-lg p-4 mb-4">
+                <div className="flex justify-between mb-4">
+                  <div>
+                    <div className="text-sm text-gray-500">Check-in</div>
+                    <div className="font-medium">{checkIn || 'Select date'}</div>
+                  </div>
+                  <div className="border-l pl-4">
+                    <div className="text-sm text-gray-500">Check-out</div>
+                    <div className="font-medium">{checkOut || 'Select date'}</div>
+                  </div>
+                </div>
+                <div className="flex justify-between">
+                  <div>
+                    <div className="text-sm text-gray-500">Guests</div>
+                    <div className="font-medium">{guests} guests</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-500">Rooms</div>
+                    <div className="font-medium">{rooms} {rooms === 1 ? 'room' : 'rooms'}</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="mb-4">
+                <div className="flex justify-between mb-2">
+                  <span>${pricePerNight.toFixed(2)} × {nights} nights × {rooms} {rooms === 1 ? 'room' : 'rooms'}</span>
+                  <span>${totalRoomPrice.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between mb-2">
+                  <span>Cleaning fee {rooms > 1 ? `(${rooms} rooms)` : ''}</span>
+                  <span>${cleaningFee.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between mb-2">
+                  <span>Service fee {rooms > 1 ? `(${rooms} rooms)` : ''}</span>
+                  <span>${serviceFee.toFixed(2)}</span>
+                </div>
+                <div className="border-t pt-2 mt-2 flex justify-between font-bold">
+                  <span>Total</span>
+                  <span>${totalPrice.toFixed(2)}</span>
+                </div>
+              </div>
+              
+              <button 
+                onClick={handleBookNow}
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition-colors"
+              >
+                Book Now
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-
-      {/* Book Now Button */}
-      <div className="p-6 bg-gray-50 border-t">
-        <button className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors">
-          Book Now - ${hotel.offers[0].price.total}/night
-        </button>
-      </div>
+      
+      <Footer />
     </div>
   );
 };
+
+export default HotelDetail;

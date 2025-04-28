@@ -5,9 +5,17 @@ import { PlaceCard } from '../components/PlaceCard';
 import { Map } from '../components/Map';
 import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
-import { searchFlights, searchHotels } from '../services/amadeus';
+import { searchFlights } from '../services/amadeus';
+import { mockHotels } from '../hotelData';
+import { useNavigate } from 'react-router-dom';
+
+
+// Import mock data
+
 
 export const SearchResults = () => {
+  const navigate = useNavigate();
+
   const [searchParams] = useSearchParams();
   const [showMap, setShowMap] = useState(false);
   const [results, setResults] = useState([]);
@@ -54,9 +62,10 @@ export const SearchResults = () => {
         departureDate,
         returnDate
       });
-
+    
       try {
         if (searchType === 'flights' && originCode && destinationCode && departureDate) {
+          // For flights, keep the API call
           const flightsData = await searchFlights(
             originCode,
             destinationCode,
@@ -64,16 +73,23 @@ export const SearchResults = () => {
             returnDate,
             parseInt(guests)
           );
-          setResults(flightsData || []);
-          console.log('Flights data received:', flightsData);
-        } else if (searchType === 'hotels' && cityCode && checkIn && checkOut) {
-          const hotelsData = await searchHotels(
-            cityCode,
-            checkIn,
-            checkOut
-          );
-          console.log('Hotels data received:', hotelsData);
-          setResults(hotelsData || []);
+          
+          if (flightsData && Array.isArray(flightsData) && flightsData.length > 0) {
+            setResults(flightsData);
+            console.log('Flights data received:', flightsData);
+          } else {
+            setError('No flight results found. Please try different search parameters.');
+            setResults([]);
+          }
+        } else if (searchType === 'hotels') {
+          // For hotels, always use mock data
+          console.log('Using mock hotel data for:', location);
+          
+          // Add a small delay to simulate API call for better UX
+          setTimeout(() => {
+            setResults(mockHotels);
+            console.log('Mock hotels loaded:', mockHotels);
+          }, 500);
         } else {
           // Log which parameters are missing
           console.log('Missing parameters for search:');
@@ -87,22 +103,36 @@ export const SearchResults = () => {
             if (!departureDate) console.log('- Missing departureDate');
           }
           
-          console.log('Using mock data due to missing parameters');
-          setResults(mockPlaces);
+          if (searchType === 'hotels') {
+            // Always use mock data for hotels regardless of missing params
+            setTimeout(() => {
+              setResults(mockHotels);
+              console.log('Mock hotels loaded with missing params:', mockHotels);
+            }, 500);
+          } else {
+            // For flights with missing params, set appropriate error
+            setError('Missing required search parameters');
+            setResults([]);
+          }
         }
       } catch (err) {
         setError(`Failed to fetch results: ${err.message}`);
         console.error('Search results error:', err);
-        // Don't automatically fall back to mock data on API errors
-        // This helps with debugging API integration issues
-        setResults([]);
+        
+        // For hotels, fall back to mock data even on API error
+        if (searchType === 'hotels') {
+          console.log('API error, falling back to mock hotel data');
+          setResults(mockHotels);
+        } else {
+          setResults([]);
+        }
       } finally {
         setLoading(false);
       }
     };
 
     fetchResults();
-  }, [searchType, originCode, destinationCode, cityCode, departureDate, returnDate, checkIn, checkOut, guests]);
+  }, [searchType, originCode, destinationCode, cityCode, departureDate, returnDate, checkIn, checkOut, guests, location]);
 
   const handleFilterChange = (type, value) => {
     setFilters((prev) => ({
@@ -110,6 +140,29 @@ export const SearchResults = () => {
       [type]: value,
     }));
   };
+
+  console.log('Search results:', {
+    searchType, 
+    results,
+    loading,
+    error,
+    filters,
+    sortBy,
+    showFilters,
+    showMap,
+    location,
+    destination,
+    checkIn,
+    checkOut,
+    departureDate,
+    returnDate,
+    guests,
+    originCode,
+    destinationCode,
+    cityCode,
+    searchTypeParam, }
+  
+  )
 
   const applyFilters = (items) => {
     if (!items || !Array.isArray(items) || items.length === 0) return [];
@@ -323,9 +376,13 @@ export const SearchResults = () => {
               </div>
             ))}
 
-            <button className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-colors">
+            <button
+              onClick={() => navigate('/checkout', { state: { selectedFlight: flight } })}
+              className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition-colors"
+            >
               Select this flight
             </button>
+
           </div>
         ))}
       </div>
@@ -337,9 +394,9 @@ export const SearchResults = () => {
     let processedResults = results;
     
     // If the results is not an array, check if it's within data property
-    if (results && !Array.isArray(results)) {
+    if (processedResults && !Array.isArray(processedResults)) {
       console.log('Results is not an array, trying to extract from data property');
-      processedResults = results.data || results.hotelOffers || [];
+      processedResults = processedResults.data || processedResults.hotelOffers || [];
     }
     
     const filteredHotels = applyFilters(processedResults);
@@ -377,7 +434,7 @@ export const SearchResults = () => {
           rating: hotelData.rating || 0,
           reviews: hotelData.reviewCount || Math.floor(Math.random() * 100) + 10,
           price: offer.price?.total ? parseFloat(offer.price.total) : 0,
-          location: hotelData.address?.cityName || '',
+          location: hotelData.address?.cityName || location || 'Unknown Location',
           latitude: parseFloat(hotelData.latitude || hotelData.geoCode?.latitude || 0),
           longitude: parseFloat(hotelData.longitude || hotelData.geoCode?.longitude || 0),
           amenities: hotelData.amenities || [],
@@ -393,7 +450,7 @@ export const SearchResults = () => {
   
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-        {sortedHotels.map((hotel) => {
+        {sortedHotels.map((hotel, index) => {
           const offer = hotel.offers?.[0] || {};
           const hotelData = hotel.hotel || {};
           
@@ -405,11 +462,11 @@ export const SearchResults = () => {
             rating: hotelData.rating || 0,
             reviews: hotelData.reviewCount || Math.floor(Math.random() * 100) + 10,
             price: offer.price?.total ? parseFloat(offer.price.total) : 0,
-            location: hotelData.address?.cityName || '',
+            location: hotelData.address?.cityName || location || 'Unknown Location',
             amenities: hotelData.amenities || [],
           };
   
-          return <PlaceCard key={placeData.id} place={placeData} />;
+          return <PlaceCard key={`${placeData.id}-${index}`} place={placeData} />;
         })}
       </div>
     );
@@ -655,4 +712,4 @@ export const SearchResults = () => {
   );
 };
 
-
+// Export the mockHotels data separately to be imported in the SearchResults componen

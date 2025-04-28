@@ -1,36 +1,113 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, CreditCard, Clock, Settings, LogOut } from 'lucide-react';
-import { Header } from '../components/Header'; // Import the Header component
+import { Header } from '../components/Header';
 import { Footer } from '../components/Footer';
-
-const mockUser = {
-  name: "John Doe",
-  email: "john.doe@example.com",
-  avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e",
-  phone: "+1 234 567 8900",
-  address: "123 Main St, New York, NY 10001",
-};
-
-const mockBookings = [
-  {
-    id: 1,
-    place: "Luxury Hotel & Spa",
-    date: "Mar 15 - Mar 20, 2024",
-    status: "Upcoming",
-    price: 1495,
-    image: "https://images.unsplash.com/photo-1566073771259-6a8506099945",
-  },
-  // Add more mock bookings as needed
-];
+import { useNavigate } from 'react-router-dom';
 
 export const Profile = () => {
   const [activeTab, setActiveTab] = useState('profile');
   const [isEditing, setIsEditing] = useState(false);
-  const [userData, setUserData] = useState(mockUser);
+  const [userData, setUserData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    address: "",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e", // Default avatar
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const navigate = useNavigate();
+
+  // Mock bookings data - this would typically come from your API
+  const mockBookings = [
+    {
+      id: 1,
+      place: "Luxury Hotel & Spa",
+      date: "Mar 15 - Mar 20, 2024",
+      status: "Upcoming",
+      price: 1495,
+      image: "https://images.unsplash.com/photo-1566073771259-6a8506099945",
+    },
+    // Add more mock bookings as needed
+  ];
+
+  // Fetch user data on component mount
+  useEffect(() => {
+    const loadUserData = () => {
+      const userId = sessionStorage.getItem('currentUserId');
+      const userEmail = sessionStorage.getItem('currentUserEmail');
+      
+      // If no user is logged in, redirect to login page
+      if (!userId || !userEmail) {
+        navigate('/login');
+        return;
+      }
+      
+      // Get user data from localStorage
+      const users = JSON.parse(localStorage.getItem('users') || '[]');
+      const currentUser = users.find(user => user.id === userId);
+      
+      if (currentUser) {
+        setUserData({
+          name: currentUser.name || "",
+          email: currentUser.email || "",
+          phone: currentUser.phone || "",
+          address: currentUser.address || "",
+          avatar: currentUser.avatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e",
+        });
+      } else {
+        // If user not found in localStorage, use minimal data from sessionStorage
+        setUserData({
+          name: userEmail.split('@')[0], // Use username part of email as name
+          email: userEmail,
+          phone: "",
+          address: "",
+          avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e",
+        });
+      }
+      
+      setIsLoading(false);
+    };
+    
+    loadUserData();
+  }, [navigate]);
 
   const handleSave = () => {
+    // Get current user ID from session storage
+    const userId = sessionStorage.getItem('currentUserId');
+    if (!userId) return;
+    
+    // Update user in localStorage
+    const users = JSON.parse(localStorage.getItem('users') || '[]');
+    const updatedUsers = users.map(user => {
+      if (user.id === userId) {
+        return {
+          ...user,
+          name: userData.name,
+          email: userData.email,
+          phone: userData.phone,
+          address: userData.address,
+        };
+      }
+      return user;
+    });
+    
+    localStorage.setItem('users', JSON.stringify(updatedUsers));
+    
+    // If email has changed, update session storage
+    if (userData.email !== sessionStorage.getItem('currentUserEmail')) {
+      sessionStorage.setItem('currentUserEmail', userData.email);
+    }
+    
     setIsEditing(false);
-    // Handle save to backend
+  };
+
+  const handleLogout = () => {
+    // Clear user auth data from session storage
+    sessionStorage.removeItem('currentUserId');
+    sessionStorage.removeItem('currentUserEmail');
+    
+    // Redirect to login page
+    navigate('/login');
   };
 
   const renderContent = () => {
@@ -192,19 +269,30 @@ export const Profile = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex justify-center items-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header /> {/* Added Header here */}
+      <Header />
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex gap-6">
+        <div className="flex flex-col md:flex-row gap-6">
           {/* Sidebar */}
-          <div className="w-64 flex-shrink-0">
+          <div className="w-full md:w-64 flex-shrink-0">
             <div className="bg-white rounded-lg shadow-sm p-6">
               <div className="flex flex-col items-center mb-6">
                 <img
                   src={userData.avatar}
                   alt={userData.name}
-                  className="w-20 h-20 rounded-full mb-3"
+                  className="w-20 h-20 rounded-full mb-3 object-cover"
                 />
                 <h2 className="font-semibold">{userData.name}</h2>
                 <p className="text-sm text-gray-600">{userData.email}</p>
@@ -256,7 +344,7 @@ export const Profile = () => {
                   Settings
                 </button>
                 <button
-                  onClick={() => alert('Logged out')}
+                  onClick={handleLogout}
                   className="w-full flex items-center px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50"
                 >
                   <LogOut size={20} className="mr-3" />
@@ -267,7 +355,7 @@ export const Profile = () => {
           </div>
 
           {/* Content */}
-          <div className="flex-1">
+          <div className="flex-1 bg-white rounded-lg shadow-sm p-6">
             {renderContent()}
           </div>
         </div>

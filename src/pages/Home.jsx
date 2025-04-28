@@ -64,19 +64,21 @@ export const Home = () => {
                 className="text-blue-600 hover:underline cursor-pointer"
               >View all deals</a>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 ">
-              {deals.map((deal, index) => (
-                <PlaceCard 
-                  key={index} 
-                  place={{ 
-                    name: deal.title, 
-                    image: deal.image, 
-                    description: deal.description 
-                  }}
-                  className="hover:scale-105 transition-transform"
-                />
-              ))}
-            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 cursor-pointer ">
+  {deals.map((deal, index) => (
+    <PlaceCard 
+      key={index} 
+      place={{ 
+        name: deal.title, 
+        image: deal.image, 
+        description: deal.description,
+        price: deal.newPrice  // <-- Pass the newPrice here!
+      }}
+      className="hover:scale-105 transition-transform"
+    />
+  ))}
+</div>
+
           </div>
         </div>
 
