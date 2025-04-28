@@ -32,6 +32,7 @@ export const Profile = () => {
       }
 
       setUserData({
+        fullName: fullName,
         name: firstName,
         email: userEmail,
         phone: "",
@@ -79,7 +80,7 @@ export const Profile = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
                   <input
                     type="text"
-                    value={userData.name}
+                    value={userData.fullName}
                     onChange={(e) => setUserData({ ...userData, name: e.target.value })}
                     disabled={!isEditing}
                     className="w-full p-2 border rounded-lg disabled:bg-gray-50"
