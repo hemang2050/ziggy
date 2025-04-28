@@ -1,7 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
-import cors from 'cors'; // import only ONCE at the top
+import cors from 'cors';
 
 import authRoutes from './routes/authRoutes.js';
 import bookingRoutes from './routes/bookingRoutes.js';
@@ -13,14 +13,14 @@ dotenv.config();
 
 const app = express();
 
-// Apply correct CORS immediately
+// CORRECT CORS SETUP
 const corsOptions = {
   origin: 'https://ziggy-frontend.vercel.app',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'], // ✅ must allow 'Content-Type'
   credentials: true,
 };
-app.use(cors(corsOptions)); // ✅ Use custom options only once
+app.use(cors(corsOptions));
 
 app.use(express.json());
 
@@ -31,23 +31,22 @@ app.use('/api/itineraries', itineraryRoutes);
 app.use('/api/share', shareRoutes);
 app.use('/api/email', emailRoutes);
 
-// Error handler
+// Error Handler
 app.use((err, req, res, next) => {
   console.error('🚨 Unhandled Error:', err.stack);
   res.status(500).json({ message: 'Internal server error' });
 });
 
-// Test route
+// Test Route
 app.get('/test', (req, res) => {
-  console.log('✅ /test route hit');
-  res.send('Server is working');
+  res.send('✅ Server is working');
 });
 
-// Database
+// Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB Connected Successfully'))
   .catch((err) => console.error('MongoDB connection failed:', err));
 
-// Server
+// Start Server
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
