@@ -11,13 +11,14 @@ export const Header = () => {
     const checkUserAuth = () => {
       const userId = sessionStorage.getItem('currentUserId');
       const userEmail = sessionStorage.getItem('currentUserEmail');
-      const userName = sessionStorage.getItem('currentUserName');
+      const fullName = sessionStorage.getItem('currentUserName');
+      const firstName = fullName ? fullName.split(' ')[0] : '';
 
       if (userId && userEmail) {
         setCurrentUser({
           id: userId,
           email: userEmail,
-          name: userName || userEmail.split('@')[0]
+          name: firstName,
         });
       } else {
         setCurrentUser(null);

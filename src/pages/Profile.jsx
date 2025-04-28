@@ -17,10 +17,14 @@ export const Profile = () => {
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
+  
+
   useEffect(() => {
     const loadUserData = () => {
       const userId = sessionStorage.getItem('currentUserId');
       const userEmail = sessionStorage.getItem('currentUserEmail');
+      const fullName = sessionStorage.getItem('currentUserName');
+      const firstName = fullName ? fullName.split(' ')[0] : '';
 
       if (!userId || !userEmail) {
         navigate('/login');
@@ -28,7 +32,7 @@ export const Profile = () => {
       }
 
       setUserData({
-        name: userEmail.split('@')[0],
+        name: firstName,
         email: userEmail,
         phone: "",
         address: "",
