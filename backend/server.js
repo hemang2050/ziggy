@@ -13,9 +13,9 @@ dotenv.config();
 
 const app = express();
 
-// ✅ CORS Final Version (based on StackOverflow)
+// Updated CORS configuration to fix the preflight request issue
 app.use(cors({
-  origin: 'https://ziggy-frontend.vercel.app', // ✅ your frontend URL
+  origin: ['https://ziggy-frontend.vercel.app', 'https://ziggy-llyf.onrender.com'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
   allowedHeaders: [
     'Content-Type',
@@ -27,7 +27,9 @@ app.use(cors({
     'x-client-secret',
     'Authorization'
   ],
-  credentials: true
+  credentials: true,
+  preflightContinue: false,
+  optionsSuccessStatus: 204
 }));
 
 app.use(express.json());
