@@ -12,7 +12,7 @@ export const Profile = () => {
     email: "",
     phone: "",
     address: "",
-    avatar: "", // no default image
+    avatar: "",
   });
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
@@ -27,26 +27,13 @@ export const Profile = () => {
         return;
       }
 
-      const users = JSON.parse(localStorage.getItem('users') || '[]');
-      const currentUser = users.find(user => user.id === userId);
-
-      if (currentUser) {
-        setUserData({
-          name: currentUser.name || "",
-          email: currentUser.email || "",
-          phone: currentUser.phone || "",
-          address: currentUser.address || "",
-          avatar: currentUser.avatar || "",
-        });
-      } else {
-        setUserData({
-          name: userEmail.split('@')[0],
-          email: userEmail,
-          phone: "",
-          address: "",
-          avatar: "",
-        });
-      }
+      setUserData({
+        name: userEmail.split('@')[0],
+        email: userEmail,
+        phone: "",
+        address: "",
+        avatar: "",
+      });
 
       setIsLoading(false);
     };
@@ -57,20 +44,6 @@ export const Profile = () => {
   const handleSave = () => {
     const userId = sessionStorage.getItem('currentUserId');
     if (!userId) return;
-
-    const users = JSON.parse(localStorage.getItem('users') || '[]');
-    const updatedUsers = users.map(user => {
-      if (user.id === userId) {
-        return { ...user, ...userData };
-      }
-      return user;
-    });
-
-    localStorage.setItem('users', JSON.stringify(updatedUsers));
-
-    if (userData.email !== sessionStorage.getItem('currentUserEmail')) {
-      sessionStorage.setItem('currentUserEmail', userData.email);
-    }
 
     setIsEditing(false);
   };
@@ -85,68 +58,82 @@ export const Profile = () => {
     switch (activeTab) {
       case 'profile':
         return (
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h3 className="text-xl font-semibold">Personal Information</h3>
-              <button
-                onClick={() => setIsEditing(!isEditing)}
-                className="text-blue-600 hover:text-blue-700"
-              >
-                {isEditing ? 'Cancel' : 'Edit'}
-              </button>
-            </div>
+          <div>
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-semibold">Personal Information</h3>
+                <button
+                  onClick={() => setIsEditing(!isEditing)}
+                  className="text-blue-600 hover:text-blue-700"
+                >
+                  {isEditing ? 'Cancel' : 'Edit'}
+                </button>
+              </div>
 
-            <div className="grid grid-cols-1 gap-6">
-              {['name', 'email', 'phone', 'address'].map(field => (
-                <div key={field}>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    {field.charAt(0).toUpperCase() + field.slice(1)}
-                  </label>
+              <div className="grid grid-cols-1 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
                   <input
-                    type={field === 'email' ? 'email' : 'text'}
-                    value={userData[field]}
-                    onChange={(e) => setUserData({ ...userData, [field]: e.target.value })}
+                    type="text"
+                    value={userData.name}
+                    onChange={(e) => setUserData({ ...userData, name: e.target.value })}
                     disabled={!isEditing}
                     className="w-full p-2 border rounded-lg disabled:bg-gray-50"
                   />
                 </div>
-              ))}
-            </div>
-
-            {isEditing && (
-              <div className="flex justify-end">
-                <button
-                  onClick={handleSave}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  Save Changes
-                </button>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input
+                    type="email"
+                    value={userData.email}
+                    onChange={(e) => setUserData({ ...userData, email: e.target.value })}
+                    disabled={!isEditing}
+                    className="w-full p-2 border rounded-lg disabled:bg-gray-50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                  <input
+                    type="tel"
+                    value={userData.phone}
+                    onChange={(e) => setUserData({ ...userData, phone: e.target.value })}
+                    disabled={!isEditing}
+                    className="w-full p-2 border rounded-lg disabled:bg-gray-50"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                  <input
+                    type="text"
+                    value={userData.address}
+                    onChange={(e) => setUserData({ ...userData, address: e.target.value })}
+                    disabled={!isEditing}
+                    className="w-full p-2 border rounded-lg disabled:bg-gray-50"
+                  />
+                </div>
               </div>
-            )}
+
+              {isEditing && (
+                <div className="flex justify-end">
+                  <button
+                    onClick={handleSave}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         );
-
       case 'bookings':
-        return (
-          <div className="text-center text-gray-500">
-            No bookings available yet.
-          </div>
-        );
-
       case 'payment':
-        return (
-          <div className="text-center text-gray-500">
-            No payment methods added yet.
-          </div>
-        );
-
       case 'settings':
         return (
-          <div className="text-center text-gray-500">
-            No settings available yet.
+          <div className="text-center text-gray-400 text-sm py-10">
+            Coming soon 🚀
           </div>
         );
-
       default:
         return null;
     }
@@ -172,45 +159,57 @@ export const Profile = () => {
           <div className="w-full md:w-64 flex-shrink-0">
             <div className="bg-white rounded-lg shadow-sm p-6">
               <div className="flex flex-col items-center mb-6">
-                <img
-                  src={userData.avatar || '/default-avatar.png'}
-                  alt={userData.name}
-                  className="w-20 h-20 rounded-full mb-3 object-cover"
-                />
+                {userData.avatar ? (
+                  <img
+                    src={userData.avatar}
+                    alt={userData.name}
+                    className="w-20 h-20 rounded-full mb-3 object-cover"
+                  />
+                ) : (
+                  <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center mb-3">
+                    <User className="w-10 h-10 text-blue-500" />
+                  </div>
+                )}
                 <h2 className="font-semibold">{userData.name}</h2>
                 <p className="text-sm text-gray-600">{userData.email}</p>
               </div>
 
               <nav className="space-y-1">
-                {[
-                  { key: 'profile', icon: User, label: 'Profile' },
-                  { key: 'bookings', icon: Clock, label: 'Bookings' },
-                  { key: 'payment', icon: CreditCard, label: 'Payment' },
-                  { key: 'settings', icon: Settings, label: 'Settings' }
-                ].map(tab => (
-                  <button
-                    key={tab.key}
-                    onClick={() => setActiveTab(tab.key)}
-                    className={`w-full flex items-center px-3 py-2 rounded-lg ${
-                      activeTab === tab.key ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'
-                    }`}
-                  >
-                    <tab.icon size={20} className="mr-3" />
-                    {tab.label}
-                  </button>
-                ))}
+                <button
+                  onClick={() => setActiveTab('profile')}
+                  className={`w-full flex items-center px-3 py-2 rounded-lg ${activeTab === 'profile' ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`}
+                >
+                  <User size={20} className="mr-3" /> Profile
+                </button>
+                <button
+                  onClick={() => setActiveTab('bookings')}
+                  className={`w-full flex items-center px-3 py-2 rounded-lg ${activeTab === 'bookings' ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`}
+                >
+                  <Clock size={20} className="mr-3" /> Bookings
+                </button>
+                <button
+                  onClick={() => setActiveTab('payment')}
+                  className={`w-full flex items-center px-3 py-2 rounded-lg ${activeTab === 'payment' ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`}
+                >
+                  <CreditCard size={20} className="mr-3" /> Payment
+                </button>
+                <button
+                  onClick={() => setActiveTab('settings')}
+                  className={`w-full flex items-center px-3 py-2 rounded-lg ${activeTab === 'settings' ? 'bg-blue-50 text-blue-600' : 'text-gray-700 hover:bg-gray-50'}`}
+                >
+                  <Settings size={20} className="mr-3" /> Settings
+                </button>
                 <button
                   onClick={handleLogout}
                   className="w-full flex items-center px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-50"
                 >
-                  <LogOut size={20} className="mr-3" />
-                  Log Out
+                  <LogOut size={20} className="mr-3" /> Log Out
                 </button>
               </nav>
             </div>
           </div>
 
-          {/* Main Content */}
+          {/* Content */}
           <div className="flex-1 bg-white rounded-lg shadow-sm p-6">
             {renderContent()}
           </div>
