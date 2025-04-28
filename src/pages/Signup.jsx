@@ -16,20 +16,22 @@ export const Signup = () => {
     e.preventDefault();
     setError('');
     setLoading(true);
-
+  
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
-
+  
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'Failed to create user');
-
+  
       sessionStorage.setItem('currentUserId', data.userId);
-      sessionStorage.setItem('currentUserEmail', formData.email);
+      sessionStorage.setItem('currentUserEmail', data.email);
       sessionStorage.setItem('currentUserToken', data.token);
+      sessionStorage.setItem('currentUserName', data.name); // ✅ Save name
+  
       navigate('/');
     } catch (err) {
       console.error(err.message);

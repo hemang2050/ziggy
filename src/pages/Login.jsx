@@ -24,10 +24,12 @@ export const Login = () => {
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'Login failed');
-
+  
       sessionStorage.setItem('currentUserId', data.userId);
       sessionStorage.setItem('currentUserEmail', data.email);
       sessionStorage.setItem('currentUserToken', data.token);
+      sessionStorage.setItem('currentUserName', data.name); // ✅ Save name
+  
       navigate('/');
     } catch (err) {
       setError(err.message);
