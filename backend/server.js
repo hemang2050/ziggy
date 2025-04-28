@@ -13,16 +13,22 @@ dotenv.config();
 
 const app = express();
 
-// ✅ CORS CONFIG — FINAL CORRECT VERSION
-const corsOptions = {
-  origin: 'https://ziggy-frontend.vercel.app',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
-};
-
-app.use(cors(corsOptions));
-app.options('*', cors(corsOptions)); // ✅ Make sure OPTIONS requests are handled
+// ✅ CORS Final Version (based on StackOverflow)
+app.use(cors({
+  origin: 'https://ziggy-frontend.vercel.app', // ✅ your frontend URL
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type',
+    'Origin',
+    'X-Requested-With',
+    'Accept',
+    'x-client-key',
+    'x-client-token',
+    'x-client-secret',
+    'Authorization'
+  ],
+  credentials: true
+}));
 
 app.use(express.json());
 
