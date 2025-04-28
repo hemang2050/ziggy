@@ -202,7 +202,7 @@ export const Checkout = ({ bookings, setBookings }) => {
         return;
       }
   
-      const response = await fetch('http://localhost:5001/api/bookings', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/bookings`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

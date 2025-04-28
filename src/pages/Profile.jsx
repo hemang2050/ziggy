@@ -52,7 +52,7 @@ export const Profile = () => {
           email: currentUser.email || "",
           phone: currentUser.phone || "",
           address: currentUser.address || "",
-          avatar: currentUser.avatar || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e",
+          avatar: currentUser.avatar,
         });
       } else {
         // If user not found in localStorage, use minimal data from sessionStorage

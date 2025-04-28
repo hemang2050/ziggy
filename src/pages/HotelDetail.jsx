@@ -193,7 +193,6 @@ export const HotelDetail = () => {
               )}
             </div>
 
-            {/* Location */}
            
           </div>
           

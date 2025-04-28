@@ -54,7 +54,7 @@ export const ItineraryPage = () => {
     const fetchBookings = async () => {
       try {
         const token = sessionStorage.getItem('currentUserToken');
-        const response = await fetch('http://localhost:5001/api/bookings', {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/bookings`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
 
