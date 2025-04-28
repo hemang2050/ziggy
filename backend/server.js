@@ -13,14 +13,15 @@ dotenv.config();
 
 const app = express();
 
-// Add this before your routes
-app.use(cors({
-    origin: '*', // Allow any origin
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: '*', // Allow any header
-    credentials: false // Don't need credentials with wildcard
-  }));
+// Correct CORS Setup
+const corsOptions = {
+  origin: ['https://ziggy-frontend.vercel.app', 'http://localhost:5173'], // frontend domains
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+};
 
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Routes
@@ -36,12 +37,12 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Internal server error' });
 });
 
-// Test route
+// Test Route
 app.get('/test', (req, res) => {
   res.send('✅ Server is working');
 });
 
-// Database
+// Database connection
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('MongoDB Connected Successfully'))
   .catch((err) => console.error('MongoDB connection failed:', err));
