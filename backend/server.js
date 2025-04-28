@@ -15,6 +15,7 @@ const app = express();
 
 // ✅ CORS CONFIG
 const corsOptions = {
+    mode: 'no-cors',
   origin: 'https://ziggy-frontend.vercel.app',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'], // include OPTIONS
   allowedHeaders: ['Content-Type', 'Authorization'], // allow content-type
