@@ -26,25 +26,26 @@ export const Itinerary = () => {
           headers: { 'Authorization': `Bearer ${token}` }
         });
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch bookings');
-        }
+        if (!response.ok) throw new Error('Failed to fetch bookings');
 
         const data = await response.json();
         setBookings(data);
+
         const grouped = groupBookingsByLocation(data);
         setGroupedBookings(grouped);
-        const initialExpandedState = {};
+
+        const initialExpanded = {};
         Object.keys(grouped).forEach(location => {
-          initialExpandedState[location] = false;
+          initialExpanded[location] = true;
         });
-        setExpandedLocations(initialExpandedState);
+        setExpandedLocations(initialExpanded);
       } catch (err) {
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
+
     fetchBookings();
   }, [navigate]);
 
@@ -53,9 +54,7 @@ export const Itinerary = () => {
     bookingsData.forEach(booking => {
       booking.accommodations?.forEach(accommodation => {
         const location = accommodation.accommodationCity || 'Unknown Location';
-        if (!grouped[location]) {
-          grouped[location] = { accommodations: [], flights: [] };
-        }
+        if (!grouped[location]) grouped[location] = { accommodations: [], flights: [] };
         grouped[location].accommodations.push({
           ...accommodation,
           bookingId: booking._id,
@@ -63,13 +62,12 @@ export const Itinerary = () => {
           price: accommodation.accommodationPrice
         });
       });
+
       if (booking.flights && booking.flights.length > 0) {
-        const firstFlightDestination = booking.flights[0]?.toDestination || 'Unknown Location';
-        if (!grouped[firstFlightDestination]) {
-          grouped[firstFlightDestination] = { accommodations: [], flights: [] };
-        }
+        const firstDestination = booking.flights[0]?.toDestination || 'Unknown Location';
+        if (!grouped[firstDestination]) grouped[firstDestination] = { accommodations: [], flights: [] };
         booking.flights.forEach(flight => {
-          grouped[firstFlightDestination].flights.push({
+          grouped[firstDestination].flights.push({
             ...flight,
             bookingId: booking._id,
             bookingDate: booking.createdAt,
@@ -82,23 +80,11 @@ export const Itinerary = () => {
   };
 
   const toggleLocation = (location) => {
-    setExpandedLocations(prev => ({
-      ...prev,
-      [location]: !prev[location]
-    }));
+    setExpandedLocations(prev => ({ ...prev, [location]: !prev[location] }));
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-  };
-
-  const formatTime = (dateString) => {
-    if (!dateString) return '';
-    const date = new Date(dateString);
-    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-  };
+  const formatDate = (dateString) => new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  const formatTime = (dateString) => new Date(dateString).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
 
   if (loading) return <div className="flex justify-center items-center h-screen">Loading your itineraries...</div>;
   if (error) return <div className="flex justify-center items-center h-screen text-red-600">Error: {error}</div>;
@@ -111,9 +97,7 @@ export const Itinerary = () => {
           <h1 className="text-3xl font-bold mb-6">My Itineraries</h1>
           <div className="bg-white rounded-lg shadow-md p-8 text-center">
             <p className="text-lg mb-4">You don't have any bookings yet.</p>
-            <Link to="/" className="inline-block bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg font-medium transition-colors">
-              Start Planning Your Trip
-            </Link>
+            <Link to="/" className="inline-block bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg font-medium">Start Planning Your Trip</Link>
           </div>
         </div>
         <Footer />
@@ -126,6 +110,7 @@ export const Itinerary = () => {
       <Header />
       <div className="max-w-6xl mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6">My Itineraries</h1>
+
         {Object.entries(groupedBookings).map(([location, locationBookings]) => (
           <div key={location} className="mb-8 bg-white rounded-lg shadow-md overflow-hidden">
             <div className="bg-blue-600 text-white p-4 flex justify-between items-center">
@@ -135,15 +120,13 @@ export const Itinerary = () => {
               </div>
               <button
                 onClick={() => toggleLocation(location)}
-                className="p-1 rounded-full hover:bg-blue-500"
+                className="p-1 rounded-full hover:bg-blue-700 transition"
               >
                 {expandedLocations[location] ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
               </button>
             </div>
 
-            <div
-              className={`transition-max-height duration-500 ease-in-out overflow-hidden ${expandedLocations[location] ? 'max-h-[2000px]' : 'max-h-0'}`}
-            >
+            {expandedLocations[location] && (
               <div className="p-4">
                 {locationBookings.accommodations.length > 0 && (
                   <div className="mb-6">
@@ -152,20 +135,16 @@ export const Itinerary = () => {
                     </h3>
                     <div className="space-y-4">
                       {locationBookings.accommodations.map((accommodation, idx) => (
-                        <div key={idx} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div key={idx} className="border rounded-lg p-4 hover:shadow-md">
                           <div className="flex justify-between items-start">
                             <div>
                               <h4 className="font-bold">{accommodation.accommodationHostName}</h4>
                               <p className="text-gray-600 text-sm">{accommodation.accommodationAddress}</p>
                               <div className="flex items-center mt-2 text-sm text-gray-600">
                                 <Calendar className="w-4 h-4 mr-1" />
-                                <span>
-                                  {formatDate(accommodation.accommodationStartDate)} - {formatDate(accommodation.accommodationEndDate)}
-                                </span>
+                                <span>{formatDate(accommodation.accommodationStartDate)} - {formatDate(accommodation.accommodationEndDate)}</span>
                               </div>
-                              <p className="mt-2 text-sm text-gray-700">
-                                <strong>Type:</strong> {accommodation.accommodationType}
-                              </p>
+                              <p className="mt-2 text-sm text-gray-700"><strong>Type:</strong> {accommodation.accommodationType}</p>
                             </div>
                             <div className="text-right">
                               <p className="font-bold text-green-600">${parseFloat(accommodation.price).toFixed(2)}</p>
@@ -185,7 +164,7 @@ export const Itinerary = () => {
                     </h3>
                     <div className="space-y-4">
                       {locationBookings.flights.map((flight, idx) => (
-                        <div key={idx} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                        <div key={idx} className="border rounded-lg p-4 hover:shadow-md">
                           <div className="flex justify-between items-start">
                             <div>
                               <h4 className="font-bold">{flight.flightBrand} - {flight.flightNumber}</h4>
@@ -200,14 +179,8 @@ export const Itinerary = () => {
                                   <p className="text-sm text-gray-600">{formatTime(flight.arriveTime)}</p>
                                 </div>
                               </div>
-                              <p className="mt-2 text-sm text-gray-700">
-                                <strong>Class:</strong> {flight.flightClass}
-                              </p>
-                              {flight.seatNumber !== 'TBD' && (
-                                <p className="text-sm text-gray-700">
-                                  <strong>Seat:</strong> {flight.seatNumber}
-                                </p>
-                              )}
+                              <p className="mt-2 text-sm text-gray-700"><strong>Class:</strong> {flight.flightClass}</p>
+                              {flight.seatNumber !== "TBD" && <p className="text-sm text-gray-700"><strong>Seat:</strong> {flight.seatNumber}</p>}
                             </div>
                             <div className="text-right">
                               <p className="font-bold text-green-600">${parseFloat(flight.price).toFixed(2)}</p>
@@ -220,9 +193,10 @@ export const Itinerary = () => {
                   </div>
                 )}
               </div>
-            </div>
+            )}
           </div>
         ))}
+
       </div>
       <Footer />
     </div>
