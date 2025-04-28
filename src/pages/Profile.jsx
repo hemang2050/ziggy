@@ -12,7 +12,7 @@ export const Profile = () => {
     email: "",
     phone: "",
     address: "",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e", // Default avatar
+    avatar: "", // Default avatar
   });
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
