@@ -22,7 +22,7 @@ export const Itinerary = () => {
           return;
         }
 
-        const response = await fetch('http://localhost:5001/api/bookings', {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/api/bookings`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -161,21 +161,23 @@ export const Itinerary = () => {
         {Object.entries(groupedBookings).map(([location, locationBookings]) => (
           <div key={location} className="mb-8 bg-white rounded-lg shadow-md overflow-hidden">
             {/* Location Header */}
-            <div 
-              className="bg-blue-600 text-white p-4 flex justify-between items-center cursor-pointer"
-              onClick={() => toggleLocation(location)}
-            >
-              <div className="flex items-center">
-                <MapPin className="mr-2" />
-                <h2 className="text-xl font-bold">{location}</h2>
-              </div>
-              <div>
-                {expandedLocations[location] ? 
-                  <ChevronUp size={24} /> : 
-                  <ChevronDown size={24} />
-                }
-              </div>
-            </div>
+            <div className="bg-blue-600 text-white p-4 flex justify-between items-center">
+  <div className="flex items-center">
+    <MapPin className="mr-2" />
+    <h2 className="text-xl font-bold">{location}</h2>
+  </div>
+  <div>
+    <button
+      onClick={() => toggleLocation(location)}
+      className="focus:outline-none"
+    >
+      {expandedLocations[location] ? 
+        <ChevronUp size={24} /> : 
+        <ChevronDown size={24} />
+      }
+    </button>
+  </div>
+</div>
             
             {expandedLocations[location] && (
               <div className="p-4">
