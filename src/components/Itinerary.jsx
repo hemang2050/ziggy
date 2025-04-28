@@ -23,9 +23,7 @@ export const Itinerary = () => {
         }
 
         const response = await fetch(`${import.meta.env.VITE_API_URL}/api/bookings`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+          headers: { 'Authorization': `Bearer ${token}` }
         });
 
         if (!response.ok) {
@@ -34,15 +32,11 @@ export const Itinerary = () => {
 
         const data = await response.json();
         setBookings(data);
-        
-        // Group bookings by location
         const grouped = groupBookingsByLocation(data);
         setGroupedBookings(grouped);
-        
-        // Initialize expanded state
         const initialExpandedState = {};
         Object.keys(grouped).forEach(location => {
-          initialExpandedState[location] = true; // Set to true to expand all initially
+          initialExpandedState[location] = false;
         });
         setExpandedLocations(initialExpandedState);
       } catch (err) {
@@ -51,23 +45,17 @@ export const Itinerary = () => {
         setLoading(false);
       }
     };
-
     fetchBookings();
   }, [navigate]);
 
-  // Group bookings by location
   const groupBookingsByLocation = (bookingsData) => {
     const grouped = {};
-  
     bookingsData.forEach(booking => {
-      // 1. Group accommodations normally
       booking.accommodations?.forEach(accommodation => {
         const location = accommodation.accommodationCity || 'Unknown Location';
-  
         if (!grouped[location]) {
           grouped[location] = { accommodations: [], flights: [] };
         }
-  
         grouped[location].accommodations.push({
           ...accommodation,
           bookingId: booking._id,
@@ -75,16 +63,11 @@ export const Itinerary = () => {
           price: accommodation.accommodationPrice
         });
       });
-  
-      // 2. Group flights under the first flight's TO destination only
       if (booking.flights && booking.flights.length > 0) {
         const firstFlightDestination = booking.flights[0]?.toDestination || 'Unknown Location';
-  
         if (!grouped[firstFlightDestination]) {
           grouped[firstFlightDestination] = { accommodations: [], flights: [] };
         }
-  
-        // Push ALL flights inside the same destination group
         booking.flights.forEach(flight => {
           grouped[firstFlightDestination].flights.push({
             ...flight,
@@ -95,10 +78,8 @@ export const Itinerary = () => {
         });
       }
     });
-  
     return grouped;
   };
-  
 
   const toggleLocation = (location) => {
     setExpandedLocations(prev => ({
@@ -110,25 +91,16 @@ export const Itinerary = () => {
   const formatDate = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
-    });
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
   };
 
   const formatTime = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    return date.toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
-      minute: '2-digit',
-      hour12: true
-    });
+    return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
   };
 
   if (loading) return <div className="flex justify-center items-center h-screen">Loading your itineraries...</div>;
-  
   if (error) return <div className="flex justify-center items-center h-screen text-red-600">Error: {error}</div>;
 
   if (Object.keys(groupedBookings).length === 0) {
@@ -139,10 +111,7 @@ export const Itinerary = () => {
           <h1 className="text-3xl font-bold mb-6">My Itineraries</h1>
           <div className="bg-white rounded-lg shadow-md p-8 text-center">
             <p className="text-lg mb-4">You don't have any bookings yet.</p>
-            <Link 
-              to="/" 
-              className="inline-block bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg font-medium transition-colors"
-            >
+            <Link to="/" className="inline-block bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-lg font-medium transition-colors">
               Start Planning Your Trip
             </Link>
           </div>
@@ -157,34 +126,25 @@ export const Itinerary = () => {
       <Header />
       <div className="max-w-6xl mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6">My Itineraries</h1>
-        
         {Object.entries(groupedBookings).map(([location, locationBookings]) => (
           <div key={location} className="mb-8 bg-white rounded-lg shadow-md overflow-hidden">
-            {/* Location Header - completely remove onClick from parent div */}
             <div className="bg-blue-600 text-white p-4 flex justify-between items-center">
               <div className="flex items-center">
                 <MapPin className="mr-2" />
                 <h2 className="text-xl font-bold">{location}</h2>
               </div>
-              {/* Make only the chevron icon clickable with stopPropagation to prevent event bubbling */}
-              <button 
-                className="cursor-pointer p-2 focus:outline-none" 
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevent event bubbling
-                  toggleLocation(location);
-                }}
-                aria-label={expandedLocations[location] ? "Collapse section" : "Expand section"}
+              <button
+                onClick={() => toggleLocation(location)}
+                className="p-1 rounded-full hover:bg-blue-500"
               >
-                {expandedLocations[location] ? 
-                  <ChevronUp size={24} /> : 
-                  <ChevronDown size={24} />
-                }
+                {expandedLocations[location] ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
               </button>
             </div>
-            
-            {expandedLocations[location] && (
+
+            <div
+              className={`transition-max-height duration-500 ease-in-out overflow-hidden ${expandedLocations[location] ? 'max-h-[2000px]' : 'max-h-0'}`}
+            >
               <div className="p-4">
-                {/* Accommodations Section */}
                 {locationBookings.accommodations.length > 0 && (
                   <div className="mb-6">
                     <h3 className="text-lg font-semibold mb-3 flex items-center">
@@ -217,8 +177,7 @@ export const Itinerary = () => {
                     </div>
                   </div>
                 )}
-                
-                {/* Flights Section */}
+
                 {locationBookings.flights.length > 0 && (
                   <div>
                     <h3 className="text-lg font-semibold mb-3 flex items-center">
@@ -244,7 +203,7 @@ export const Itinerary = () => {
                               <p className="mt-2 text-sm text-gray-700">
                                 <strong>Class:</strong> {flight.flightClass}
                               </p>
-                              {flight.seatNumber !== "TBD" && (
+                              {flight.seatNumber !== 'TBD' && (
                                 <p className="text-sm text-gray-700">
                                   <strong>Seat:</strong> {flight.seatNumber}
                                 </p>
@@ -261,7 +220,7 @@ export const Itinerary = () => {
                   </div>
                 )}
               </div>
-            )}
+            </div>
           </div>
         ))}
       </div>
