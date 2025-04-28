@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import email_icon from '../assets/mail.png';
 import name_icon from '../assets/user.png';
 import password_icon from '../assets/padlock.png';
@@ -123,6 +123,15 @@ export const Login = () => {
               />
             </div>
 
+            {/* Forgot password (only show on login) */}
+            {!isLoginView && (
+              <div className="text-right">
+                <Link to="/forgot-password" className="text-sm text-yellow-300 hover:underline">
+                  Forgot Password?
+                </Link>
+              </div>
+            )}
+
             {error && <div className="text-red-300 text-center text-sm">{error}</div>}
 
             <div className="flex flex-col space-y-3">
@@ -193,3 +202,5 @@ export const Login = () => {
     </div>
   );
 };
+
+export default Login;
