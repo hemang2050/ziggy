@@ -58,6 +58,7 @@ export const signupUser = async (req, res) => {
   };
 
 //Forgot password 
+//Forgot password 
 export const forgotPassword = async (req, res) => {
     const { email } = req.body;
     
@@ -74,6 +75,7 @@ export const forgotPassword = async (req, res) => {
         { expiresIn: '15m' }
       );
   
+      // ✅ Use dynamic frontend URL
       const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
   
       // Set up nodemailer transporter
