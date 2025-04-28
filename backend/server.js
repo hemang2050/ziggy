@@ -14,13 +14,12 @@ dotenv.config();
 const app = express();
 
 // Add this before your routes
-app.options('*', cors()) // Enable pre-flight requests for all routes
-
-// Then use your normal CORS configuration
 app.use(cors({
-  origin: 'https://ziggy-frontend.vercel.app',
-  credentials: true
-}));
+    origin: '*', // Allow any origin
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: '*', // Allow any header
+    credentials: false // Don't need credentials with wildcard
+  }));
 
 app.use(express.json());
 
