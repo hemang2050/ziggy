@@ -160,22 +160,26 @@ export const Itinerary = () => {
         
         {Object.entries(groupedBookings).map(([location, locationBookings]) => (
           <div key={location} className="mb-8 bg-white rounded-lg shadow-md overflow-hidden">
-            {/* Location Header */}
+            {/* Location Header - completely remove onClick from parent div */}
             <div className="bg-blue-600 text-white p-4 flex justify-between items-center">
               <div className="flex items-center">
                 <MapPin className="mr-2" />
                 <h2 className="text-xl font-bold">{location}</h2>
               </div>
-              <div 
-                className="cursor-pointer p-2" 
-                onClick={() => toggleLocation(location)}
+              {/* Make only the chevron icon clickable with stopPropagation to prevent event bubbling */}
+              <button 
+                className="cursor-pointer p-2 focus:outline-none" 
+                onClick={(e) => {
+                  e.stopPropagation(); // Prevent event bubbling
+                  toggleLocation(location);
+                }}
                 aria-label={expandedLocations[location] ? "Collapse section" : "Expand section"}
               >
                 {expandedLocations[location] ? 
                   <ChevronUp size={24} /> : 
                   <ChevronDown size={24} />
                 }
-              </div>
+              </button>
             </div>
             
             {expandedLocations[location] && (
