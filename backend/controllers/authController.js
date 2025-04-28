@@ -74,7 +74,7 @@ export const forgotPassword = async (req, res) => {
         { expiresIn: '15m' }
       );
   
-      const resetLink = `http://localhost:5173/reset-password?token=${resetToken}`;
+      const resetLink = `${import.meta.env.VITE_API_URL}/reset-password?token=${resetToken}`;
   
       // Set up nodemailer transporter
       const transporter = nodemailer.createTransport({
