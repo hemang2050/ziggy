@@ -13,24 +13,11 @@ dotenv.config();
 
 const app = express();
 
-// Updated CORS configuration to fix the preflight request issue
+// Simplified CORS configuration
 app.use(cors({
-  origin: ['https://ziggy-frontend.vercel.app', 'https://ziggy-llyf.onrender.com'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD', 'OPTIONS'],
-  allowedHeaders: [
-    'Content-Type',
-    'Origin',
-    'X-Requested-With',
-    'Accept',
-    'x-client-key',
-    'x-client-token',
-    'x-client-secret',
-    'Authorization'
-  ],
-  credentials: true,
-  preflightContinue: false,
-  optionsSuccessStatus: 204
-}));
+    origin: true, // Allow any origin that sends credentials
+    credentials: true
+  }));
 
 app.use(express.json());
 
