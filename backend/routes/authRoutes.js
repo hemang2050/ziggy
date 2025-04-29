@@ -1,31 +1,24 @@
-// backend/routes/authRoutes.js
-
 import express from 'express';
-import { signupUser, loginUser, forgotPassword, resetPassword } from '../controllers/authController.js';
-
+import { signupUser, loginUser, forgotPassword, resetPassword, confirmEmail } from '../controllers/authController.js';  // ✅ Correct import
 
 const router = express.Router();
 
 // Signup route
 router.post('/signup', (req, res, next) => {
-    console.log('📡 /signup route hit');
-    next();
-  }, signupUser);
-  
+  console.log('📡 /signup route hit');
+  next();
+}, signupUser);
 
 // Login route
 router.post('/login', loginUser);
 
-//confirm email route
+// Confirm email route
+router.post('/confirm-email', confirmEmail); // ✅ Correct usage
 
-router.post('/confirm-email', confirmEmail);
-
-//Forgot password route
+// Forgot password route
 router.post('/forgot-password', forgotPassword);
 
 // Reset password route
 router.post('/reset-password', resetPassword);
 
-
-
-export default router;  // ✅ Important: Export default router
+export default router;
