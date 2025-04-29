@@ -1,40 +1,39 @@
+// Signup.jsx
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import email_icon from '../assets/mail.png';
+import name_icon from '../assets/user.png';
+import password_icon from '../assets/padlock.png';
 
 export const Signup = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
+  const [successMessage, setSuccessMessage] = useState('');
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-  
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),
       });
-  
       const data = await response.json();
-      if (!response.ok) throw new Error(data.message || 'Failed to create user');
-  
-      sessionStorage.setItem('currentUserId', data.userId);
-      sessionStorage.setItem('currentUserEmail', data.email);
-      sessionStorage.setItem('currentUserToken', data.token);
-      sessionStorage.setItem('currentUserName', data.name); // ✅ Save name
-  
-      navigate('/');
+      if (!response.ok) throw new Error(data.message || 'Signup failed');
+
+      setSuccessMessage('Signup successful! Please check your email to confirm your account.');
+      setFormData({ name: '', email: '', password: '' });
+
     } catch (err) {
-      console.error(err.message);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -42,89 +41,66 @@ export const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-6">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white shadow-xl rounded-2xl">
-        <div className="text-center">
-          <h2 className="text-3xl font-extrabold text-gray-900">Create your account</h2>
-          <p className="mt-2 text-sm text-gray-600">
-            Already have an account?{' '}
-            <Link to="/login" className="font-medium text-indigo-600 hover:underline">
-              Log in
-            </Link>
-          </p>
-        </div>
+    <div className="min-h-screen flex items-center justify-center bg-blue-50 p-4">
+      <div className="bg-white shadow-md rounded-lg p-8 w-full max-w-md">
+        <h2 className="text-2xl font-bold text-center mb-6">Create an Account</h2>
 
-        {error && (
-          <div className="bg-red-100 text-red-700 p-3 rounded-lg border border-red-300 text-sm text-center">
-            {error}
-          </div>
+        {error && <div className="bg-red-100 text-red-700 p-3 rounded mb-4">{error}</div>}
+        {successMessage && <div className="bg-green-100 text-green-700 p-3 rounded mb-4">{successMessage}</div>}
+
+        {!successMessage && (
+          <form onSubmit={handleSignup} className="space-y-4">
+            <div className="flex items-center bg-gray-100 p-2 rounded">
+              <img src={name_icon} alt="name" className="w-6 h-6 mr-2" />
+              <input
+                type="text"
+                name="name"
+                placeholder="Full Name"
+                value={formData.name}
+                onChange={handleChange}
+                className="bg-transparent outline-none w-full"
+                required
+              />
+            </div>
+
+            <div className="flex items-center bg-gray-100 p-2 rounded">
+              <img src={email_icon} alt="email" className="w-6 h-6 mr-2" />
+              <input
+                type="email"
+                name="email"
+                placeholder="Email"
+                value={formData.email}
+                onChange={handleChange}
+                className="bg-transparent outline-none w-full"
+                required
+              />
+            </div>
+
+            <div className="flex items-center bg-gray-100 p-2 rounded">
+              <img src={password_icon} alt="password" className="w-6 h-6 mr-2" />
+              <input
+                type="password"
+                name="password"
+                placeholder="Password"
+                value={formData.password}
+                onChange={handleChange}
+                className="bg-transparent outline-none w-full"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+            >
+              {loading ? 'Creating...' : 'Sign Up'}
+            </button>
+          </form>
         )}
-
-        <form className="space-y-5" onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="name" className="block mb-1 text-sm font-medium text-gray-700">
-              Full name
-            </label>
-            <input
-              id="name"
-              name="name"
-              type="text"
-              required
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="John Doe"
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="email" className="block mb-1 text-sm font-medium text-gray-700">
-              Email address
-            </label>
-            <input
-              id="email"
-              name="email"
-              type="email"
-              required
-              autoComplete="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="you@example.com"
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="password" className="block mb-1 text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Create a strong password"
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-lg shadow-sm text-white font-medium bg-indigo-600 hover:bg-indigo-700 transition ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-          >
-            {loading ? 'Creating account...' : 'Sign up'}
-          </button>
-        </form>
-
-        <p className="text-xs text-gray-400 text-center pt-4">
-          By signing up, you agree to our{' '}
-          <span className="text-indigo-500 hover:underline cursor-pointer">Terms of Service</span> and{' '}
-          <span className="text-indigo-500 hover:underline cursor-pointer">Privacy Policy</span>.
-        </p>
       </div>
     </div>
   );
 };
+
+export default Signup;

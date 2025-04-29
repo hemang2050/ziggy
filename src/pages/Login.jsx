@@ -1,48 +1,22 @@
+// src/pages/Login.jsx
+
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import email_icon from '../assets/mail.png';
-import name_icon from '../assets/user.png';
 import password_icon from '../assets/padlock.png';
 import travel_icon from '../assets/travel.png';
 import plane_icon from '../assets/plane.png';
 import bed_icon from '../assets/bed.png';
 
-export const Login = () => {
+const Login = () => {
   const navigate = useNavigate();
-  const [isLoginView, setIsLoginView] = useState(false);
-  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSignup = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || 'Signup failed');
-
-      sessionStorage.setItem('currentUserId', data.userId);
-      sessionStorage.setItem('currentUserEmail', data.email);
-      sessionStorage.setItem('currentUserToken', data.token);
-      sessionStorage.setItem('currentUserName', formData.name);
-
-      navigate('/');
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
   };
 
   const handleLogin = async (e) => {
@@ -81,23 +55,9 @@ export const Login = () => {
         </div>
 
         <div className="w-full max-w-sm">
-          <h2 className="text-2xl font-bold text-center mb-6">{isLoginView ? 'Create Account' : 'Login'}</h2>
+          <h2 className="text-2xl font-bold text-center mb-6">Login</h2>
 
-          <form onSubmit={isLoginView ? handleSignup : handleLogin} className="space-y-4">
-            {isLoginView && (
-              <div className="flex items-center bg-white rounded-md px-4 py-3">
-                <img src={name_icon} alt="name" className="w-6 h-6 mr-4" />
-                <input
-                  type="text"
-                  name="name"
-                  placeholder="Full Name"
-                  value={formData.name}
-                  onChange={handleChange}
-                  className="w-full bg-white text-black outline-none"
-                  required
-                />
-              </div>
-            )}
+          <form onSubmit={handleLogin} className="space-y-4">
             <div className="flex items-center bg-white rounded-md px-4 py-3">
               <img src={email_icon} alt="email" className="w-6 h-6 mr-4" />
               <input
@@ -110,6 +70,7 @@ export const Login = () => {
                 required
               />
             </div>
+
             <div className="flex items-center bg-white rounded-md px-4 py-3">
               <img src={password_icon} alt="password" className="w-6 h-6 mr-4" />
               <input
@@ -123,52 +84,29 @@ export const Login = () => {
               />
             </div>
 
-            {/* Forgot password (only show on login) */}
-            {!isLoginView && (
-              <div className="text-right">
-                <Link to="/forgot-password" className="text-sm text-yellow-300 hover:underline">
-                  Forgot Password?
-                </Link>
-              </div>
-            )}
+            {/* Forgot password */}
+            <div className="text-right">
+              <Link to="/forgot-password" className="text-sm text-yellow-300 hover:underline">
+                Forgot Password?
+              </Link>
+            </div>
 
             {error && <div className="text-red-300 text-center text-sm">{error}</div>}
 
-            <div className="flex flex-col space-y-3">
-              <button
-                type="submit"
-                disabled={loading}
-                className="bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-bold py-2 rounded transition"
-              >
-                {loading ? (isLoginView ? 'Creating...' : 'Signing in...') : (isLoginView ? 'Create Account' : 'Login')}
-              </button>
-            </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-bold py-2 rounded transition"
+            >
+              {loading ? 'Signing in...' : 'Login'}
+            </button>
           </form>
 
           <div className="text-center mt-4">
-            {isLoginView ? (
-              <>
-                <span className="text-sm text-white">Already have an account?</span>
-                <button
-                  type="button"
-                  onClick={() => setIsLoginView(false)}
-                  className="ml-2 text-yellow-300 hover:underline text-sm"
-                >
-                  Login
-                </button>
-              </>
-            ) : (
-              <>
-                <span className="text-sm text-white">New here?</span>
-                <button
-                  type="button"
-                  onClick={() => setIsLoginView(true)}
-                  className="ml-2 text-yellow-300 hover:underline text-sm"
-                >
-                  Create an account
-                </button>
-              </>
-            )}
+            <span className="text-sm text-white">New here?</span>
+            <Link to="/signup" className="ml-2 text-yellow-300 hover:underline text-sm">
+              Create an account
+            </Link>
           </div>
         </div>
       </div>
