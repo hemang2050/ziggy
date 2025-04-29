@@ -6,7 +6,6 @@ import jwt from 'jsonwebtoken';
 
 // backend/controllers/authController.js
 
-import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 
 export const signupUser = async (req, res) => {
