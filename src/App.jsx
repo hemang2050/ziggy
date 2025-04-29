@@ -11,6 +11,7 @@ import { Checkout } from './pages/Checkout'; // Added CheckoutPage route
 import { Login } from './pages/Login';
 import { Signup } from './pages/Signup';
 import { ConfirmationPage } from './pages/Confirmation';
+import { ConfirmEmail } from './pages/ConfirmEmail';
 import { ForgotPassword } from './pages/ForgotPassword';
 import { ResetPassword } from './pages/ResetPassword';
 import { useState } from 'react';
@@ -34,6 +35,9 @@ const App = () => {
         <Route path="/results" element={<SearchResults />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        import { ConfirmEmail } from './pages/ConfirmEmail';
+
+<Route path="/confirm-email" element={<ConfirmEmail />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
       </Routes>

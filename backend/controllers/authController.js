@@ -6,30 +6,71 @@ import jwt from 'jsonwebtoken';
 
 // backend/controllers/authController.js
 
+import jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer';
+
 export const signupUser = async (req, res) => {
     try {
       const { name, email, password } = req.body;
+  
       const existingUser = await User.findOne({ email });
-      if (existingUser) {
-        return res.status(400).json({ message: 'User already exists' });
-      }
+      if (existingUser) return res.status(400).json({ message: 'User already exists' });
   
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(password, salt);
-      const newUser = new User({ name, email, password: hashedPassword });
-      await newUser.save();
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const newUser = await User.create({ name, email, password: hashedPassword });
   
-      const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+      // Generate email confirmation token
+      const confirmationToken = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+  
+      const confirmLink = `${process.env.FRONTEND_URL}/confirm-email?token=${confirmationToken}`;
+  
+      // Setup transporter
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: process.env.EMAIL_USER,
+          pass: process.env.EMAIL_PASS,
+        },
+      });
+  
+      // Send confirmation email
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: newUser.email,
+        subject: 'Confirm your Ziggy account',
+        html: `
+          <div style="font-family: Arial, sans-serif; background-color: #f3f4f6; padding: 30px;">
+            <div style="max-width: 600px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+              <div style="text-align: center; margin-bottom: 20px;">
+                <div style="display: inline-block; background: #3b82f6; border-radius: 50%; width: 50px; height: 50px; line-height: 50px;">
+                  <span style="font-size: 24px; color: white;">◇</span>
+                </div>
+                <h1 style="margin-top: 10px; font-size: 24px; color: #1f2937;">Ziggy</h1>
+              </div>
+  
+              <h2 style="color: #111827;">Confirm your email address</h2>
+              <p style="color: #4b5563; font-size: 15px;">Hello ${name.split(' ')[0]},</p>
+              <p style="color: #4b5563; font-size: 15px;">Thanks for signing up with Ziggy! Please confirm your email address by clicking the button below.</p>
+  
+              <div style="text-align: center; margin: 30px 0;">
+                <a href="${confirmLink}" style="background-color: #2563eb; color: white; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: bold; font-size: 16px;">Confirm Email</a>
+              </div>
+  
+              <p style="color: #6b7280; font-size: 13px;">If you didn't create an account, you can safely ignore this email.</p>
+  
+              <hr style="margin: 30px 0; border: none; border-top: 1px solid #e5e7eb;">
+              <p style="text-align: center; font-size: 12px; color: #9ca3af;">© 2025 Ziggy. All rights reserved.</p>
+            </div>
+          </div>
+        `
+      });
   
       res.status(201).json({
-        message: 'User registered successfully',
-        token,
-        userId: newUser._id,
-        email: newUser.email,
-        name: newUser.name, // ✅ ADD THIS
+        message: 'Signup successful! Please check your email to confirm your account.',
       });
+  
     } catch (err) {
-      console.error(err);
+      console.error('Signup Error:', err.message);
       res.status(500).json({ message: 'Server error' });
     }
   };
@@ -133,6 +174,29 @@ export const resetPassword = async (req, res) => {
   
     } catch (err) {
       console.error('Reset Password Error:', err.message);
+      res.status(400).json({ message: 'Invalid or expired token' });
+    }
+  };
+
+
+// Confirm email
+export const confirmEmail = async (req, res) => {
+    const { token } = req.body;
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const user = await User.findById(decoded.id);
+      if (!user) return res.status(400).json({ message: 'User not found' });
+  
+      if (user.isVerified) {
+        return res.status(200).json({ message: 'Email already verified' });
+      }
+  
+      user.isVerified = true;
+      await user.save();
+  
+      res.status(200).json({ message: 'Email confirmed successfully!' });
+    } catch (err) {
+      console.error(err);
       res.status(400).json({ message: 'Invalid or expired token' });
     }
   };

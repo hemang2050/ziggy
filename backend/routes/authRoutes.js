@@ -16,10 +16,16 @@ router.post('/signup', (req, res, next) => {
 // Login route
 router.post('/login', loginUser);
 
+//confirm email route
+
+router.post('/confirm-email', confirmEmail);
+
 //Forgot password route
 router.post('/forgot-password', forgotPassword);
 
 // Reset password route
 router.post('/reset-password', resetPassword);
+
+
 
 export default router;  // ✅ Important: Export default router
