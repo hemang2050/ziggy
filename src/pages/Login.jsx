@@ -8,7 +8,7 @@ import travel_icon from '../assets/travel.png';
 import plane_icon from '../assets/plane.png';
 import bed_icon from '../assets/bed.png';
 
-const Login = () => {
+export const Login = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
@@ -141,4 +141,3 @@ const Login = () => {
   );
 };
 
-export default Login;
