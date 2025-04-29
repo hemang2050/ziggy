@@ -93,31 +93,31 @@ export const confirmEmail = async (req, res) => {
 
 // Login
 export const loginUser = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ message: 'Invalid credentials' });
-
-    if (!user.isVerified) {
-      return res.status(401).json({ message: 'Please verify your email before logging in' });
+    try {
+      const { email, password } = req.body;
+      const user = await User.findOne({ email });
+      if (!user) return res.status(400).json({ message: 'Invalid credentials' });
+  
+      if (!user.isVerified) {
+        return res.status(400).json({ message: 'Please verify your email before logging in.' });
+      }
+  
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
+  
+      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+  
+      res.status(200).json({
+        token,
+        userId: user._id,
+        email: user.email,
+        name: user.name,
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: 'Server error' });
     }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
-
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
-
-    res.status(200).json({
-      token,
-      userId: user._id,
-      email: user.email,
-      name: user.name,
-    });
-  } catch (err) {
-    console.error('Login Error:', err.message);
-    res.status(500).json({ message: 'Server error' });
-  }
-};
+  };
 
 // Forgot password
 export const forgotPassword = async (req, res) => {
