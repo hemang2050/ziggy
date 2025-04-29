@@ -112,47 +112,46 @@ export const Header = () => {
       </div>
 
       {/* Mobile Menu */}
-      <div className={`${isMenuOpen ? 'block' : 'hidden'} sm:hidden bg-white`}>
-        <div className="pt-2 pb-3 space-y-1">
-          <Link to="/" className="block px-6 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">Home</Link>
-          <Link to="/itineraries" className="block px-6 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">Itinerary</Link>
+      {/* Mobile Menu */}
+<div className={`${isMenuOpen ? 'block' : 'hidden'} sm:hidden bg-white`}>
+  <div className="pt-2 pb-3 space-y-1">
+    <Link to="/" className="block px-6 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">Home</Link>
+    <Link to="/itineraries" className="block px-6 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">Itinerary</Link>
+  </div>
+
+  {currentUser && (
+    <>
+      <div className="pt-4 pb-3 border-t border-gray-200">
+        <div className="flex items-center px-6">
+          <div className="flex-shrink-0">
+            <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+              <svg className="h-6 w-6 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+          </div>
+          <div className="ml-3">
+            <div className="text-base font-medium text-gray-800">{currentUser.name}</div>
+            <div className="text-sm font-medium text-gray-500">{currentUser.email}</div>
+          </div>
         </div>
-        <div className="pt-4 pb-3 border-t border-gray-200">
-          <div className="flex items-center px-6">
-            <div className="flex-shrink-0">
-              <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                <svg className="h-6 w-6 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </div>
-            </div>
-            <div className="ml-3">
-              {currentUser ? (
-                <>
-                  <div className="text-base font-medium text-gray-800">{currentUser.name}</div>
-                  <div className="text-sm font-medium text-gray-500">{currentUser.email}</div>
-                </>
-              ) : (
-                <>
-                  <div className="text-base font-medium text-gray-800">Guest User</div>
-                  <div className="text-sm font-medium text-gray-500">guest@example.com</div>
-                </>
-              )}
-            </div>
-          </div>
-          <div className="mt-3 space-y-1">
-            {currentUser ? (
-              <>
-                <Link to="/profile" className="block px-6 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">Your Profile</Link>
-                <Link to="/bookings" className="block px-6 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">Your Bookings</Link>
-                <button onClick={handleSignOut} className="block w-full text-left px-6 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">Sign out</button>
-              </>
-            ) : (
-              <Link to="/login" className="block px-6 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">Log in</Link>
-            )}
-          </div>
+        <div className="mt-3 space-y-1">
+          <Link to="/profile" className="block px-6 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">Your Profile</Link>
+          <Link to="/bookings" className="block px-6 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">Your Bookings</Link>
+          <button onClick={handleSignOut} className="block w-full text-left px-6 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">Sign out</button>
         </div>
       </div>
+    </>
+  )}
+
+  {!currentUser && (
+    <div className="pt-4 pb-3 border-t border-gray-200">
+      <div className="mt-3 space-y-1">
+        <Link to="/login" className="block px-6 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">Log in</Link>
+      </div>
+    </div>
+  )}
+</div>
     </nav>
   );
 };
