@@ -98,7 +98,7 @@ export const mockHotels = [
   {
     hotel: {
       hotelId: 'MOCK005',
-      name: 'Hotel Arts Barcelona',
+      name: 'Hotel Caesar Palace',
       rating: 4.6,
       amenities: ['Pool', 'Spa', 'Gym', 'WiFi', 'Restaurant'],
       // address: {
@@ -146,7 +146,7 @@ export const mockHotels = [
   {
     hotel: {
       hotelId: 'MOCK007',
-      name: 'The Ritz London',
+      name: 'The Ritz',
       rating: 4.8,
       amenities: ['Pool', 'Spa', 'Gym', 'WiFi', 'Restaurant'],
       // address: {
@@ -170,7 +170,7 @@ export const mockHotels = [
   {
     hotel: {
       hotelId: 'MOCK008',
-      name: 'Hotel de Paris Monte-Carlo',
+      name: 'Hotel Tipton',
       rating: 4.9,
       amenities: ['Pool', 'Spa', 'Gym', 'WiFi', 'Restaurant'],
       // address: {
