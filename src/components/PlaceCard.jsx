@@ -72,10 +72,7 @@ export const PlaceCard = ({ place }) => {
         <div className="p-4 flex flex-col flex-grow">
           <div className="mb-3">
             <h3 className="font-bold text-gray-800 text-lg truncate">{place.name}</h3>
-            <p className="text-gray-500 text-sm mt-1 flex items-center">
-              <span className="inline-block w-1 h-1 rounded-full bg-gray-400 mr-1"></span>
-              {place.location || 'Great location'}
-            </p>
+            
           </div>
           
           {/* Amenities preview */}
